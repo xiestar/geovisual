@@ -1,0 +1,64 @@
+<!-- A map for provinces of china -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>D3: show china map</title>
+    <script type="text/javascript" src="d3/d3.js"></script>
+    <script type="text/javascript" src="lib/d3-2.10.3/lib/colorbrewer/colorbrewer.js"></script>
+   <style>
+
+    #tooltip {
+        position: absolute;
+        width: 180px;
+        height: auto;
+        padding: 10px;
+        background-color: #F08080;
+        -webkit-border-radius: 10px;
+        -moz-border-radius: 10px;
+        border-radius: 10px;
+        -webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+        -moz-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+        box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+        pointer-events: none;
+      }
+      #tooltip.hidden {
+        display: none;
+      }
+      #tooltip p {
+        margin: 0;
+        font-family: sans-serif;
+        font-size: 16px;
+        line-height: 20px;
+      }
+</style>
+  </head>
+  <body>
+     <div id="tooltip" class="hidden">
+      <p>State:<span id="area">西城区</span></p>
+      <p>value:<span id="value">100</span></p>
+    </div>
+
+    <script src="js/beijing.js"></script>
+
+    <script type="text/javascript">
+
+      //Width and height
+      var w = 1200
+      var h = 800;
+     
+      var svg = d3.select("body")
+          .append("svg")
+          .attr("width", w)   // <-- Here
+          .attr("height", h);
+
+      //Define quantize scale to sort data values into buckets of color
+      var color = d3.scale.quantize()
+                .range(["rgb(237,248,233)","rgb(186,228,179)","rgb(116,196,118)","rgb(49,163,84)","rgb(0,109,44)"]);
+
+      var jsonPath = "data/json/beijing.json";
+      drawMap(jsonPath, svg);
+    
+    </script>
+  </body>
+</html>

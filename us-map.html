@@ -1,0 +1,188 @@
+<!-- stack bar base bottom x-axis on line -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>D3: show map</title>
+      <!-- Add D3 JavaSript files -->
+    <script type="text/javascript" src="d3/d3.js"></script>
+    <script type="text/javascript" src="lib/d3-2.10.3/lib/colorbrewer/colorbrewer.js"></script>
+    <style>
+
+    #tooltip {
+        position: absolute;
+        width: 180px;
+        height: auto;
+        padding: 10px;
+        background-color: #F08080;
+        -webkit-border-radius: 10px;
+        -moz-border-radius: 10px;
+        border-radius: 10px;
+        -webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+        -moz-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+        box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+        pointer-events: none;
+      }
+      #tooltip.hidden {
+        display: none;
+      }
+      #tooltip p {
+        margin: 0;
+        font-family: sans-serif;
+        font-size: 16px;
+        line-height: 20px;
+      }
+  </style>
+</head>
+<body>
+    <div id="tooltip" class="hidden">
+      <p><strong>US State Value</strong></p>
+      <p><span id="value">100</span></p>
+    </div>
+    <script type="text/javascript">
+
+      //Width and height
+      var w = 800;
+      var h = 600
+
+      //Define map projection
+      var projection = d3.geo.albersUsa()
+                   .translate([w/2, h/2])
+                   .scale([1200]);
+
+      //Define path generator
+      var path = d3.geo.path()
+               .projection(projection);
+               
+      //Define quantize scale to sort data values into buckets of color
+      var color = d3.scale.quantize()
+                .range(["rgb(237,248,233)","rgb(186,228,179)","rgb(116,196,118)","rgb(49,163,84)","rgb(0,109,44)"]);
+                //Colors taken from colorbrewer.js, included in the D3 download
+
+      //Create SVG element
+      var svg = d3.select("body")
+            .append("svg")
+            .attr("width", w)
+            .attr("height", h);
+
+      //Load in agriculture data
+      d3.csv("data/csv/us-ag-productivity-2004.csv", function(data) {
+
+        //Set input domain for color scale
+        color.domain([
+          d3.min(data, function(d) { return d.value; }), 
+          d3.max(data, function(d) { return d.value; })
+        ]);
+
+        //Load in GeoJSON data
+        d3.json("data/json/us-states.json", function(json) {
+
+          //Merge the ag. data and GeoJSON
+          //Loop through once for each ag. data value
+          for (var i = 0; i < data.length; i++) {
+        
+            //Grab state name
+            var dataState = data[i].state;
+            
+            //Grab data value, and convert from string to float
+            var dataValue = parseFloat(data[i].value);
+        
+            //Find the corresponding state inside the GeoJSON
+            for (var j = 0; j < json.features.length; j++) {
+            
+              var jsonState = json.features[j].properties.name;
+        
+              if (dataState == jsonState) {
+            
+                //Copy the data value into the JSON
+                json.features[j].properties.value = dataValue;
+                
+                //Stop looking through the JSON
+                break;
+                
+              }
+            }   
+          }
+
+          //Bind data and create one path per GeoJSON feature
+          svg.selectAll("path")
+             .data(json.features)
+             .enter()
+             .append("path")
+             .attr("d", path)
+             .attr("fill", function(d) {
+                //Get data value
+                var value = d.properties.value;
+                
+                if (value) {
+                  //If value exists
+                  console.log(color(value));
+                  return color(value);
+                } else {
+                  //If value is undefined…
+                  return "#ccc";
+                }
+             })
+             .on("mouseover",function(d,i){
+               d3.select(this)
+                    .attr("fill", "yellow");
+                //Get this bar's x/y values, then augment for the tooltip
+              var xPosition = w / 2;
+              var yPosition = h / 2;
+              
+              //Update the tooltip position and value
+              d3.select("#tooltip")
+              .style("left", xPosition + "px")
+              .style("top", yPosition + "px")
+              .select("#value")
+              .text( d.properties.value);
+              
+              //Show the tooltip
+              d3.select("#tooltip").classed("hidden", false);
+              })
+              .on("mouseout", function(d,i) {
+                 d3.select(this)
+                    .attr("fill", function(d) {
+                      var value = d.properties.value;
+                      
+                        if (value) {
+                          //If value exists…
+                          return color(value);
+                        } else {
+                          //If value is undefined…
+                          return "#ccc";
+                        }
+                    });
+      
+                //Hide the tooltip
+                d3.select("#tooltip").classed("hidden", true);
+            });
+
+          svg.selectAll("text")
+           .data(json.features)
+           .enter()
+           .append("text")
+           .text(function(d) {
+           return d.properties.name;
+           })
+           .attr({
+            x: function(d, i) { return path.centroid(d)[0];   },
+            y: function(d) { return path.centroid(d)[1];},
+           "font-family": "sans-serif",
+           "font-size": "11px",
+           "fill": "black",
+           "text-anchor":"middle"
+            }); 
+      
+        });
+      
+      });
+
+      
+
+    
+     
+
+    </script>
+  </body>
+</html>

@@ -1,0 +1,83 @@
+<!-- A map with GDP value for provinces of china -->
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>D3: show china map</title>
+      <script type="text/javascript" src="d3/d3.js"></script>
+    <style type="text/css">
+      /* No style rules here yet */
+    </style>
+  </head>
+  <body>
+    <script type="text/javascript">
+
+      //Width and height
+      var w = 1600;
+      var h = 1800;
+      var background = "#D1EEEE";
+      var overColor = "#F08080";
+
+      var svg = d3.select("body")
+      .append("svg")
+      .attr("width", w)   // <-- Here
+      .attr("height", h);
+     
+
+      //Set up path method      
+      var projection = d3.geo.mercator()
+      .center([107, 31])
+      .scale(850)
+      .translate([w/2, h/2]);
+
+      var path = d3.geo.path()
+                 .projection(projection);
+
+      //Bind geodata
+      d3.json("data/json/china.json", function(error, root) {
+   
+          if (error) 
+              return console.error(error);
+          console.log(root.features);
+              
+          svg.selectAll("path")
+              .data( root.features )
+              .enter()
+              .append("path")
+              .attr("stroke","#000")
+              .attr("stroke-width",1)
+              .attr("fill", background)
+              .attr("d", path )
+              .on("mouseover",function(d,i){
+                  d3.select(this)
+                    .attr("fill", overColor);
+              })
+              .on("mouseout",function(d,i){
+                  d3.select(this)
+                    .attr("fill", background);
+              });
+
+          svg.selectAll("text")
+           .data(root.features)
+           .enter()
+           .append("text")
+           .text(function(d) {
+           return d.properties.name;
+           })
+           .attr({
+            x: function(d, i) { return path.centroid(d)[0];   },
+            y: function(d) { return path.centroid(d)[1];},
+           "font-family": "sans-serif",
+           "font-size": "11px",
+           "fill": "black",
+           "text-anchor":"middle"
+            });
+
+
+          
+    });
+
+ 
+    </script>
+  </body>
+</html>
