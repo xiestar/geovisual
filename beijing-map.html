@@ -9,28 +9,28 @@
    <style>
 
     #tooltip {
-        position: absolute;
-        width: 180px;
-        height: auto;
-        padding: 10px;
-        background-color: #F08080;
-        -webkit-border-radius: 10px;
-        -moz-border-radius: 10px;
-        border-radius: 10px;
-        -webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
-        -moz-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
-        box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
-        pointer-events: none;
-      }
-      #tooltip.hidden {
-        display: none;
-      }
-      #tooltip p {
-        margin: 0;
-        font-family: sans-serif;
-        font-size: 16px;
-        line-height: 20px;
-      }
+      position: absolute;
+      opacity:0.9;
+      z-index:1000;
+      text-align:left;
+      border-radius:4px;
+      -moz-border-radius:4px;
+      -webkit-border-radius:4px;
+      padding:8px 8px;
+      color: black;
+      background-color:#E6E6E6;
+      border: 1px solid #B3B3B3;
+      box-shadow: 2px 2px 5px #888;
+    }
+    #tooltip.hidden {
+      display: none;
+    }
+    #tooltip p {
+      margin: 0;
+      font-family: sans-serif;
+      font-size: 16px;
+      line-height: 20px;
+    }
 </style>
   </head>
   <body>
@@ -58,6 +58,16 @@
 
       var jsonPath = "data/json/beijing.json";
       drawMap(jsonPath, svg);
+
+        // zoom and pan
+      var zoom = d3.behavior.zoom()
+          .on("zoom",function() {
+          svg.attr("transform","translate("+ 
+            d3.event.translate.join(",")+")scale("+d3.event.scale+")");
+          svg.selectAll("path")  
+            .attr("d", path.projection(projection)); 
+      });
+      svg.call(zoom);
     
     </script>
   </body>

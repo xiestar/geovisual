@@ -64,10 +64,15 @@ function drawMap(mapPath, svg) {
              	d3.select(this)
                     .attr("fill", overColor);
 
-                var areaName = d.properties.name;
-                var areaValue = d.properties.value;
+              //获得中心点坐标
+              var centroid = path.centroid(d);
+              centroid.x = centroid[0];
+              centroid.y = centroid[1];
 
-	          	 drawTip(areaName,areaValue);
+              var areaName = d.properties.name;
+              var areaValue = d.properties.value;
+
+	          	drawTip(areaName,areaValue,centroid);
              })
              .on("mouseout",function(d,i) {
              	d3.select(this)
@@ -98,14 +103,12 @@ function drawBackColor(d) {
     }
 } // end drawBackColor
 
-function drawTip(areaName,areaValue) {
-	//Get this bar's x/y values, then augment for the tooltip
-	var xPosition = w / 2;
-	var yPosition = h / 2;
+function drawTip(areaName,areaValue,centroid) {
+	
 
 	var tooltip = d3.select("#tooltip")
-		.style("left",  xPosition + "px")
-		.style("top",yPosition + "px");
+    .style("left",centroid.x + "px")
+    .style("top",centroid.y + "px");
 
 	tooltip.select("#area").text(areaName)
 	tooltip.select("#value").text(areaValue);
