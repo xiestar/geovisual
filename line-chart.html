@@ -1,0 +1,98 @@
+<html>
+	<head>
+		<title>Simple Line Graph using SVG and d3.js</title>
+		<script src="d3/d3-master/d3.js"></script>
+		<style>
+			/* tell the SVG path to be a thin blue line without any area fill */
+			path {
+				stroke: steelblue;
+				stroke-width: 1;
+				fill: none;
+			}
+
+			.axis path,
+			.axis line {
+			    fill: none;
+			    stroke: grey;
+			    stroke-width: 1;
+			    shape-rendering: crispEdges;
+			}
+		</style>
+	</head>
+	<body>
+		<script type="text/javascript">
+		var lineData = [{x: 1, y: 5}, 
+		{x: 20,y: 20}, 
+		{x: 40,y: 10},
+		{x: 60,y: 40}, 
+		{x: 80,y: 5},
+		{x: 100,y: 60}];
+
+		// Set the dimensions of the canvas / graph
+        var margin = {top: 20, right: 20, bottom: 320, left: 50};
+		var width = 1000 - margin.right - margin.left;
+		var height = 500 - margin.top - margin.bottom;
+
+		// Set the ranges
+		var xRange = d3.scale.linear()
+			.range([0, width])
+			.domain([d3.min(lineData, function(d){
+				return d.x;
+			}), d3.max(lineData, function(d){
+				return d.x;
+			})]);
+		var yRange = d3.scale.linear()
+			.range([height, 0])
+			.domain([d3.min(lineData, function(d){
+				return d.y;
+			}), d3.max(lineData, function(d){
+				return d.y;
+			})]);
+
+		// Define the axes
+		var xAxis = d3.svg.axis()
+		    .scale(xRange)
+		    .tickSize(5);
+
+		var  yAxis = d3.svg.axis()
+		     .scale(yRange)
+		     .ticks(5)
+		     .orient('left')
+		     .tickSubdivide(true);
+
+		// Adds the svg canvas
+		var svgContainer = d3.select("body")
+			.append('svg')
+			.attr("width", width + margin.right + margin.left)
+			.attr("height", height + margin.top + margin.bottom)
+			.append("g")
+            .attr("transform",  "translate(" + margin.left + "," + margin.top + ")");
+
+		svgContainer.append('svg:g')
+			.attr('class', 'x axis')
+			.attr('transform', 'translate(0,' + height + ')')
+			.call(xAxis);
+
+		svgContainer.append('svg:g')
+			.attr('class', 'y axis')
+			.call(yAxis);
+
+// create a line function that can convert data[] into x and y points
+		var lineFunc = d3.svg.line()
+			  .x(function(d) {
+			    return xRange(d.x);
+			  })
+			  .y(function(d) {
+			    return yRange(d.y);
+			  })
+			  .interpolate('linear');
+
+// Add the line by appending an svg:path element with the data line we created above
+// do this AFTER the axes above so that the line is above the tick-lines
+	    svgContainer.append('svg:path')
+		  .attr('d', lineFunc(lineData));
+
+
+		</script>
+	</body>	
+</html>
