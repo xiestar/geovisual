@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  	 <meta charset="utf-8">
+        <title>graph for dynamic bar by multiple click</title>  
+    <script type="text/javascript" src="d3/d3.js"></script>
+  </head>
+  <body>
+  	<p>Click on this text to update the chart with new data values
+as many times as you like!</p>
+  	  <script>
+			var w = 600;
+			var h = 250;
+			var padding = 20;
+			
+			var dataset = [ 5, 10, 13, 19, 21, 25, 22, 18, 15, 13,
+							11, 12, 15, 20, 18, 17, 16, 18, 23, 25 ];
+
+			var xScale = d3.scale.ordinal()
+							.domain(d3.range(dataset.length))
+							.rangeRoundBands([0, w], 0.05);
+
+		    var yScale = d3.scale.linear()
+                     .domain([0, d3.max(dataset, function(d) { return d; })])
+                     .range([padding, h - padding]);
+
+            var svg = d3.select("body")
+            .append("svg")
+            .attr("width", w)   // <-- Here
+            .attr("height", h); // <-- and here!
+
+			svg.selectAll("rect")
+			.data(dataset)
+			.enter()
+			.append("rect")
+			.attr("x", function(d, i) {
+			return xScale(i);         // <-- Set x values
+			})
+			.attr("y", function(d) {
+                return h - yScale(d);
+            })
+			.attr("width", xScale.rangeBand())
+			.attr("height", function(d) {
+            return yScale(d); 
+            })
+            .attr("fill", function(d) {
+            return "rgb(0, 0, " + (d * 10) + ")";
+            });
+
+            svg.selectAll("text")
+           .data(dataset)
+           .enter()
+           .append("text")
+           .text(function(d) {
+           return d;
+           })
+           .attr({
+            x: function(d, i) { return xScale(i) + xScale.rangeBand() / 2;   },
+            y: function(d) { return h - yScale(d) + 14;},
+           "font-family": "sans-serif",
+           "font-size": "11px",
+           "fill": "white",
+           "text-anchor":"middle"
+            });
+
+            d3.select("p")
+            .on("click", function() {
+       
+				//New values for dataset
+				var numValues = dataset.length; //Count original length of dataset
+				var maxValue = 50;              
+				dataset = [];               //Initialize empty array
+				for (var i = 0; i < numValues; i++) {               //Loop numValues times
+				var newNumber = Math.floor(1 + Math.random() * maxValue); //New random integer (0-24)
+				dataset.push(newNumber);                        //Add new number to array
+				}
+
+				var yScale = d3.scale.linear()
+                .domain([0, d3.max(dataset)])
+                .range([0, h]);
+					
+					//Update all rects
+					svg.selectAll("rect")
+					.data(dataset)
+					.transition()  
+					.delay(function(d, i) {
+					 return i / dataset.length * 1000;
+					})
+					.duration(500)
+					// .duration(2000)
+                    // .ease("linear")
+					.attr("y", function(d) {
+					return h - yScale(d);
+					})
+					.attr("height", function(d) {
+					return yScale(d);
+					})
+					.attr("fill", function(d) {   // <-- Down here!
+						return "rgb(0, 0, " + (d * 10) + ")";
+					});
+
+					svg.selectAll("text")
+					.data(dataset)
+					.text(function(d) {
+					return d;
+					})
+					.attr("x", function(d, i) {
+					return xScale(i) + xScale.rangeBand() / 2;
+					})
+					.attr("y", function(d) {
+					return h - yScale(d) + 14;
+					});
+			});
+
+  </script>
+  </body>
+</html>
